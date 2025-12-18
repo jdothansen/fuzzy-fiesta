@@ -38,7 +38,7 @@ jobs:
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v3
         with:
-          subject-path: 'output/app.txt'
+          subject-path: 'target/my-java-app-1.0-SNAPSHOT.jar'
 
       # 5) Attest SBOM
       - name: Attest SBOM

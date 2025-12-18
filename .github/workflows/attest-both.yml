@@ -1,0 +1,45 @@
+name: Build + Attest Both
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_and_attest:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+
+    steps:
+      # 1) Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2) Build an example artifact
+      - name: Build artifact
+        run: |
+          mkdir output
+          echo "Hello world!" > output/app.txt
+
+      # 3) Generate SBOM
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: './output'
+          format: 'spdx-json'
+          output-file: 'output/sbom.spdx.json'
+
+      # 4) Attest build provenance
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: 'output/app.txt'
+
+      # 5) Attest SBOM
+      - name: Attest SBOM
+        uses: actions/attest-sbom@v3
+        with:
+          subject-path: 'output/app.txt'
+          sbom-path: 'output/sbom.spdx.json'

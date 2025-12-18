@@ -17,19 +17,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) Build an example artifact
-      - name: Build artifact
-        run: |
-          mkdir output
-          echo "Hello world!" > output/app.txt
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build JAR
+        run: mvn package
 
       # 3) Generate SBOM
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
-          path: './output'
+          path: './'
           format: 'spdx-json'
-          output-file: 'output/sbom.spdx.json'
+          output-file: 'sbom.json'
 
       # 4) Attest build provenance
       - name: Attest build provenance
@@ -41,5 +44,5 @@ jobs:
       - name: Attest SBOM
         uses: actions/attest-sbom@v3
         with:
-          subject-path: 'output/app.txt'
-          sbom-path: 'output/sbom.spdx.json'
+          subject-path: 'target/my-java-app-1.0-SNAPSHOT.jar'
+          sbom-path: 'sbom.json'
